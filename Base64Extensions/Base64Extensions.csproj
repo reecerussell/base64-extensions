@@ -1,7 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Reece Russell</Authors>
+    <Company>Reece Russell</Company>
+    <Description>With support for URL-safe encoding, this provides helpers methods for encoding and decoding base64, in multiple forms.</Description>
+    <Copyright>Reece Russell 2021</Copyright>
+    <PackageProjectUrl>https://github.com/reecerussell/base64-extensions</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/reecerussell/base64-extensions</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>base64, encoding, decoding</PackageTags>
+    <Version>0.1.0</Version>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -11,5 +22,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
