@@ -18,7 +18,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '5.x'
 
       - name: Restore
         run: dotnet restore Base64Extensions/Base64Extensions.csproj
@@ -41,6 +41,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0'
+
       - name: Restore
         run: dotnet restore Base64Extensions/Base64Extensions.csproj
 
@@ -67,7 +72,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '5.0'
 
       - name: Publish Base64Extensions
         run: dotnet nuget push packages/Base64Extensions.*.*.*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://www.nuget.org/api/v2/package
