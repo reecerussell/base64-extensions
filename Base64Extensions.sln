@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Base64Extensions", "Base64E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base64Extensions.Tests", "Base64Extensions.Tests\Base64Extensions.Tests.csproj", "{5AF701C2-A22E-4210-B532-23C7ACE40B16}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base64Extensions.Benchmarks", "Base64Extensions.Benchmarks\Base64Extensions.Benchmarks.csproj", "{B1980248-7618-4244-8B8A-C7CAEEBA4811}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5AF701C2-A22E-4210-B532-23C7ACE40B16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AF701C2-A22E-4210-B532-23C7ACE40B16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AF701C2-A22E-4210-B532-23C7ACE40B16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1980248-7618-4244-8B8A-C7CAEEBA4811}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1980248-7618-4244-8B8A-C7CAEEBA4811}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1980248-7618-4244-8B8A-C7CAEEBA4811}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1980248-7618-4244-8B8A-C7CAEEBA4811}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
