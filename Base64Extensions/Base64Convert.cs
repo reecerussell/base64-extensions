@@ -74,7 +74,7 @@ namespace Base64Extensions
         /// <param name="value">The value to encode.</param>
         /// <param name="urlSafe">Determines whether the result will contain URL-safe characters.</param>
         /// <returns>A base64 representation of <paramref name="value"/>.</returns>
-        public static unsafe Span<byte> Encode(ReadOnlySpan<byte> value, bool urlSafe)
+        public static Span<byte> Encode(ReadOnlySpan<byte> value, bool urlSafe)
         {
             var encodedLen = Base64.GetMaxEncodedToUtf8Length(value.Length);
             Span<byte> encoded = stackalloc byte[encodedLen];
@@ -83,12 +83,8 @@ namespace Base64Extensions
 
             if (urlSafe)
             {
-                fixed (byte* bytes = encoded)
-                {
-                    Replace(bytes, encoded.Length, EncodingReplacements);
-                }
-
-                encoded = encoded.TrimEnd(Padding);
+                Replace(encoded, EncodingReplacements);
+                TrimEndPadding(ref encoded);
             }
 
             return encoded.ToArray();
@@ -125,7 +121,7 @@ namespace Base64Extensions
         /// </summary>
         /// <param name="value">The base64 data to decode.</param>
         /// <returns>A plain text representation of <paramref name="value"/>.</returns>
-        public static unsafe Span<byte> Decode(ReadOnlySpan<byte> value)
+        public static Span<byte> Decode(ReadOnlySpan<byte> value)
         {
             var offset = 0;
             switch (value.Length % 4)
@@ -137,29 +133,24 @@ namespace Base64Extensions
             Span<byte> encoded = stackalloc byte[value.Length + offset];
             value.CopyTo(encoded);
 
-            fixed (byte* bytes = encoded)
-            {
-                Replace(bytes, encoded.Length, DecodingReplacements);
-                PadEnd(bytes, encoded.Length, offset);
-            }
+            Replace(encoded, DecodingReplacements);
+            PadEnd(encoded, offset);
 
-            var decodedLen = Base64.GetMaxDecodedFromUtf8Length(encoded.Length);
-            Span<byte> decoded = stackalloc byte[decodedLen];
+            Span<byte> decoded = stackalloc byte[Base64.GetMaxDecodedFromUtf8Length(encoded.Length)];
 
             Base64.DecodeFromUtf8(encoded, decoded, out _, out var bytesWritten);
-            
+
             return decoded.Slice(0, bytesWritten).ToArray();
         }
 
         /// <summary>
-        /// Replaces characters in an byte-array, inline using <paramref name="replacements"/>.
+        /// Replaces characters in <paramref name="src"/>, inline using <paramref name="replacements"/>.
         /// </summary>
-        /// <param name="src">A pointer to the target byte-array.</param>
-        /// <param name="srcLength">The length of <paramref name="src"/>.</param>
-        /// <param name="replacements">The character replacements to use.</param>
-        private static unsafe void Replace(byte* src, int srcLength, IDictionary<char, char> replacements)
+        /// <param name="src">The <see cref="Span{T}"/> to do replacements on.</param>
+        /// <param name="replacements">A dictionary of replacement characters.</param>
+        private static void Replace(Span<byte> src, IDictionary<char, char> replacements)
         {
-            for (var i = 0; i < srcLength; i++)
+            for (var i = 0; i < src.Length; i++)
             {
                 var c = (char)src[i];
 
@@ -171,17 +162,40 @@ namespace Base64Extensions
         }
 
         /// <summary>
-        /// Appends <paramref name="paddingLength"/> amount padding to <paramref name="src"/>.
+        /// Sets the <paramref name="paddingLength"/> number of bytes from the end of
+        /// <paramref name="src"/> to <see cref="Padding"/>.
         /// </summary>
-        /// <param name="src">A pointer to the target byte-array.</param>
-        /// <param name="srcLength">The length of <paramref name="src"/>.</param>
-        /// <param name="paddingLength">The number of characters padding to append.</param>
-        private static unsafe void PadEnd(byte* src, int srcLength, int paddingLength)
+        /// <param name="src">The <see cref="Span{T}"/> to append to.</param>
+        /// <param name="paddingLength">The amount of padding to add.</param>
+        private static void PadEnd(Span<byte> src, int paddingLength)
         {
             for (var i = 1; i <= paddingLength; i++)
             {
-                src[srcLength - i] = Padding;
+                src[^i] = Padding;
             }
+        }
+
+        /// <summary>
+        /// Trims all consecutive <see cref="Padding"/> characters from the end of <paramref name="src"/>.
+        /// </summary>
+        /// <param name="src">A reference to the <see cref="Span{T}"/> to trim.</param>
+        private static void TrimEndPadding(ref Span<byte> src)
+        {
+            var count = 0;
+
+            for (var i = src.Length - 1; i > 0; i--)
+            {
+                if (src[i] == Padding)
+                {
+                    count++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            src = src.Slice(0, src.Length - count);
         }
     }
 }
