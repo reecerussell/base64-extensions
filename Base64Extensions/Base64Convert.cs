@@ -65,7 +65,7 @@ namespace Base64Extensions
         {
             Span<byte> bytes = value;
 
-            return Encode(bytes, urlSafe).ToArray();
+            return Encode(bytes, urlSafe);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Base64Extensions
         /// <param name="value">The value to encode.</param>
         /// <param name="urlSafe">Determines whether the result will contain URL-safe characters.</param>
         /// <returns>A base64 representation of <paramref name="value"/>.</returns>
-        public static Span<byte> Encode(ReadOnlySpan<byte> value, bool urlSafe)
+        public static byte[] Encode(ReadOnlySpan<byte> value, bool urlSafe)
         {
             var encodedLen = Base64.GetMaxEncodedToUtf8Length(value.Length);
             Span<byte> encoded = stackalloc byte[encodedLen];
@@ -154,9 +154,9 @@ namespace Base64Extensions
             {
                 var c = (char)src[i];
 
-                if (replacements.ContainsKey(c))
+                if (replacements.TryGetValue(c, out var replacement))
                 {
-                    src[i] = (byte)replacements[c];
+                    src[i] = (byte) replacement;
                 }
             }
         }

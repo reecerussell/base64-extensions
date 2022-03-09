@@ -1,6 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
 using System;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Base64Extensions.Benchmarks
@@ -16,7 +15,7 @@ namespace Base64Extensions.Benchmarks
         {
             var data = new byte[DataLength];
 
-            var rng = new RNGCryptoServiceProvider();
+            var rng = new DeterministicRandomGenerator();
             rng.GetBytes(data);
 
             _data = Convert.ToBase64String(data);
