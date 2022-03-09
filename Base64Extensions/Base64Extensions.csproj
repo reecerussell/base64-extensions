@@ -11,7 +11,7 @@
     <RepositoryUrl>https://github.com/reecerussell/base64-extensions</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>base64, encoding, decoding</PackageTags>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
