@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Reece Russell</Authors>
     <Company>Reece Russell</Company>
@@ -13,6 +12,7 @@
     <PackageTags>base64, encoding, decoding</PackageTags>
     <Version>0.3.0</Version>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <TargetFrameworks>net5.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
