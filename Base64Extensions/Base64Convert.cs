@@ -31,7 +31,16 @@ namespace Base64Extensions
         /// <param name="value">The <see cref="string"/> to encode.</param>
         /// <returns>A base64 representation of <paramref name="value"/>.</returns>
         public static string Encode(string value)
-            => Encode(value, false);
+            => Encode(value, false, out _);
+        
+        /// <summary>
+        /// Converts <paramref name="value"/> to a base64 string, using UTF8 encoding.
+        /// </summary>
+        /// <param name="value">The <see cref="string"/> to encode.</param>
+        /// <param name="bytesWritten">The number of Base64 bytes written to the output.</param>
+        /// <returns>A base64 representation of <paramref name="value"/>.</returns>
+        public static string Encode(string value, out int bytesWritten)
+            => Encode(value, false, out bytesWritten);
 
         /// <summary>
         /// Converts <paramref name="value"/> to a base64 string, using UTF8 encoding.
@@ -40,10 +49,20 @@ namespace Base64Extensions
         /// <param name="urlSafe">Determines whether the result will contain URL-safe characters.</param>
         /// <returns>A base64 representation of <paramref name="value"/>.</returns>
         public static string Encode(string value, bool urlSafe)
+            => Encode(value, urlSafe, out _);
+        
+        /// <summary>
+        /// Converts <paramref name="value"/> to a base64 string, using UTF8 encoding.
+        /// </summary>
+        /// <param name="value">The <see cref="string"/> to encode.</param>
+        /// <param name="urlSafe">Determines whether the result will contain URL-safe characters.</param>
+        /// <param name="bytesWritten">The number of Base64 bytes written to the output.</param>
+        /// <returns>A base64 representation of <paramref name="value"/>.</returns>
+        public static string Encode(string value, bool urlSafe, out int bytesWritten)
         {
             var bytes = Encoding.GetBytes(value);
-            var encoded = Encode(bytes, urlSafe);
-
+            var encoded = Encode(bytes, urlSafe, out bytesWritten);
+            
             return Encoding.GetString(encoded);
         }
 
@@ -53,7 +72,16 @@ namespace Base64Extensions
         /// <param name="value">The value to encode.</param>
         /// <returns>A base64 representation of <paramref name="value"/>.</returns>
         public static byte[] Encode(byte[] value)
-            => Encode(value, false);
+            => Encode(value, false, out _);
+        
+        /// <summary>
+        /// Converts <paramref name="value"/> to base64, using UTF8 encoding.
+        /// </summary>
+        /// <param name="value">The value to encode.</param>
+        /// <param name="bytesWritten">The number of Base64 bytes written to the output.</param>
+        /// <returns>A base64 representation of <paramref name="value"/>.</returns>
+        public static byte[] Encode(byte[] value, out int bytesWritten)
+            => Encode(value, false, out bytesWritten);
 
         /// <summary>
         /// Converts <paramref name="value"/> to base64, using UTF8 encoding.
@@ -65,7 +93,21 @@ namespace Base64Extensions
         {
             Span<byte> bytes = value;
 
-            return Encode(bytes, urlSafe);
+            return Encode(bytes, urlSafe, out _);
+        }
+        
+        /// <summary>
+        /// Converts <paramref name="value"/> to base64, using UTF8 encoding.
+        /// </summary>
+        /// <param name="value">The value to encode.</param>
+        /// <param name="urlSafe">Determines whether the result will contain URL-safe characters.</param>
+        /// <param name="bytesWritten">The number of Base64 bytes written to the output.</param>
+        /// <returns>A base64 representation of <paramref name="value"/>.</returns>
+        public static byte[] Encode(byte[] value, bool urlSafe, out int bytesWritten)
+        {
+            Span<byte> bytes = value;
+
+            return Encode(bytes, urlSafe, out bytesWritten);
         }
 
         /// <summary>
@@ -73,18 +115,22 @@ namespace Base64Extensions
         /// </summary>
         /// <param name="value">The value to encode.</param>
         /// <param name="urlSafe">Determines whether the result will contain URL-safe characters.</param>
+        /// <param name="bytesWritten">The number of Base64 bytes written to the output.</param>
         /// <returns>A base64 representation of <paramref name="value"/>.</returns>
-        public static byte[] Encode(ReadOnlySpan<byte> value, bool urlSafe)
+        public static byte[] Encode(ReadOnlySpan<byte> value, bool urlSafe, out int bytesWritten)
         {
             var encodedLen = Base64.GetMaxEncodedToUtf8Length(value.Length);
             Span<byte> encoded = stackalloc byte[encodedLen];
 
-            Base64.EncodeToUtf8(value, encoded, out _, out _);
+            Base64.EncodeToUtf8(value, encoded, out _, out bytesWritten);
 
             if (urlSafe)
             {
                 Replace(encoded, EncodingReplacements);
-                TrimEndPadding(ref encoded);
+                TrimEndPadding(ref encoded, out var paddingRemoved);
+
+                // Subtract the padding from the number of bytes written.
+                bytesWritten -= paddingRemoved;
             }
 
             return encoded.ToArray();
@@ -179,7 +225,8 @@ namespace Base64Extensions
         /// Trims all consecutive <see cref="Padding"/> characters from the end of <paramref name="src"/>.
         /// </summary>
         /// <param name="src">A reference to the <see cref="Span{T}"/> to trim.</param>
-        private static void TrimEndPadding(ref Span<byte> src)
+        /// <param name="bytesRemoved">The number of bytes of padding removed.</param>
+        private static void TrimEndPadding(ref Span<byte> src, out int bytesRemoved)
         {
             var count = 0;
 
@@ -196,6 +243,7 @@ namespace Base64Extensions
             }
 
             src = src.Slice(0, src.Length - count);
+            bytesRemoved = count;
         }
     }
 }

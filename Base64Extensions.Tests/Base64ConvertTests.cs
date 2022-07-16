@@ -13,12 +13,32 @@ namespace Base64Extensions.Tests
         {
             Base64Convert.Encode(value).Should().Be(expected);
         }
+        
+        [Theory]
+        [InlineData("Hello World", "SGVsbG8gV29ybGQ=", 16)]
+        [InlineData("Hello World ", "SGVsbG8gV29ybGQg", 16)]
+        public void Encode_GivenPlainTextValue_ReturnsEncodedBase64StringWithBytesWritten(
+            string value, string expected, int expectedBytesWritten)
+        {
+            Base64Convert.Encode(value, out var bytesWritten).Should().Be(expected);
+            bytesWritten.Should().Be(expectedBytesWritten);
+        }
 
         [Theory]
         [InlineData("Hello World", "SGVsbG8gV29ybGQ")]
         public void Encode_GivenPlainTextAndUrlSafeFlag_ReturnsUrlSafeBase64String(string value, string expected)
         {
             Base64Convert.Encode(value, true).Should().Be(expected);
+        }
+        
+        [Theory]
+        [InlineData("Hello World", "SGVsbG8gV29ybGQ", 15)]
+        public void Encode_GivenPlainTextAndUrlSafeFlag_ReturnsUrlSafeBase64StringWithBytesWritten(
+            string value, string expected, int expectedBytesWritten)
+        {
+            var encoded = Base64Convert.Encode(value, true, out var bytesWritten);
+            encoded.Should().Be(expected);
+            bytesWritten.Should().Be(expectedBytesWritten);
         }
 
         [Fact]
@@ -37,6 +57,25 @@ namespace Base64Extensions.Tests
 
             encString.Should().Be("ocu7BkU2bu1mq+yB2dL/4A==");
         }
+        
+        [Fact]
+        public void Encode_NotGivenUrlSafeFlag_ReturnsStandardBase64WithBytesWritten()
+        {
+            var bytes = new byte[]
+            {
+                161, 203, 187, 6,
+                69, 54, 110, 237,
+                102, 171, 236, 129,
+                217, 210, 255, 224
+            };
+
+            var encoded = Base64Convert.Encode(bytes, out var bytesWritten);
+            
+            var encString = Encoding.UTF8.GetString(encoded);
+            encString.Should().Be("ocu7BkU2bu1mq+yB2dL/4A==");
+
+            bytesWritten.Should().Be(24);
+        }
 
         [Fact]
         public void Encode_GivenUrlSafeFlag_ReturnsUrlSafeBase64()
@@ -53,6 +92,25 @@ namespace Base64Extensions.Tests
             var encString = Encoding.UTF8.GetString(encoded);
 
             encString.Should().Be("ocu7BkU2bu1mq-yB2dL_4A");
+        }
+        
+        [Fact]
+        public void Encode_GivenUrlSafeFlag_ReturnsUrlSafeBase64WithBytesWritten()
+        {
+            var bytes = new byte[]
+            {
+                161, 203, 187, 6,
+                69, 54, 110, 237,
+                102, 171, 236, 129,
+                217, 210, 255, 224
+            };
+
+            var encoded = Base64Convert.Encode(bytes, true, out var bytesWritten);
+            
+            var encString = Encoding.UTF8.GetString(encoded);
+            encString.Should().Be("ocu7BkU2bu1mq-yB2dL_4A");
+
+            bytesWritten.Should().Be(22);
         }
 
         [Theory]
