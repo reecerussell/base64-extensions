@@ -42,8 +42,15 @@ namespace Base64Extensions
         public static string Encode(string value, bool urlSafe)
         {
             var bytes = Encoding.GetBytes(value);
-            var encoded = Encode(bytes, urlSafe);
+            var encoded = Encode(bytes, urlSafe, out var bytesWritten);
 
+            if (urlSafe)
+            {
+                // Use the range operator to avoid appending empty bytes to the string.
+                var endIndex = bytesWritten - 1;
+                encoded = encoded[..endIndex];
+            }
+            
             return Encoding.GetString(encoded);
         }
 
@@ -54,6 +61,15 @@ namespace Base64Extensions
         /// <returns>A base64 representation of <paramref name="value"/>.</returns>
         public static byte[] Encode(byte[] value)
             => Encode(value, false);
+        
+        /// <summary>
+        /// Converts <paramref name="value"/> to base64, using UTF8 encoding.
+        /// </summary>
+        /// <param name="value">The value to encode.</param>
+        /// <param name="bytesWritten">The number of Base64 bytes written to the output.</param>
+        /// <returns>A base64 representation of <paramref name="value"/>.</returns>
+        public static byte[] Encode(byte[] value, out int bytesWritten)
+            => Encode(value, false, out bytesWritten);
 
         /// <summary>
         /// Converts <paramref name="value"/> to base64, using UTF8 encoding.
@@ -65,7 +81,21 @@ namespace Base64Extensions
         {
             Span<byte> bytes = value;
 
-            return Encode(bytes, urlSafe);
+            return Encode(bytes, urlSafe, out _);
+        }
+        
+        /// <summary>
+        /// Converts <paramref name="value"/> to base64, using UTF8 encoding.
+        /// </summary>
+        /// <param name="value">The value to encode.</param>
+        /// <param name="urlSafe">Determines whether the result will contain URL-safe characters.</param>
+        /// <param name="bytesWritten">The number of Base64 bytes written to the output.</param>
+        /// <returns>A base64 representation of <paramref name="value"/>.</returns>
+        public static byte[] Encode(byte[] value, bool urlSafe, out int bytesWritten)
+        {
+            Span<byte> bytes = value;
+
+            return Encode(bytes, urlSafe, out bytesWritten);
         }
 
         /// <summary>
@@ -73,13 +103,14 @@ namespace Base64Extensions
         /// </summary>
         /// <param name="value">The value to encode.</param>
         /// <param name="urlSafe">Determines whether the result will contain URL-safe characters.</param>
+        /// <param name="bytesWritten">The number of Base64 bytes written to the output.</param>
         /// <returns>A base64 representation of <paramref name="value"/>.</returns>
-        public static byte[] Encode(ReadOnlySpan<byte> value, bool urlSafe)
+        public static byte[] Encode(ReadOnlySpan<byte> value, bool urlSafe, out int bytesWritten)
         {
             var encodedLen = Base64.GetMaxEncodedToUtf8Length(value.Length);
             Span<byte> encoded = stackalloc byte[encodedLen];
 
-            Base64.EncodeToUtf8(value, encoded, out _, out _);
+            Base64.EncodeToUtf8(value, encoded, out _, out bytesWritten);
 
             if (urlSafe)
             {
